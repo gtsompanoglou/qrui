@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Management</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Inventory Overview</h1>
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Color</th>
+            {% for size in sizes %}
+                <th>{{ size }}</th>
+            {% endfor %}
+        </tr>
+        {% for type_color, sizes in inventory.items() %}
+            <tr>
+                <td>{{ type_color[0] }}</td>
+                <td>{{ type_color[1] }}</td>
+                {% for size in sizes.values() %}
+                    <td>{{ size }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <h2>Scan QR Code</h2>
+    <input type="text" id="qr_input" placeholder="Scan QR Code" />
+    <button onclick="submitScan()">Submit</button>
+    <script>
+        function submitScan() {
+            let qr_code = document.getElementById('qr_input').value;
+            fetch('/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pk: qr_code })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+    </script>
+</body>
+</html>
