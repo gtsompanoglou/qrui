@@ -6,9 +6,42 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid black; padding: 10px; text-align: center; }
     </style>
+    <script>
+        function updateOrderInfo(orderSize, orderNumber) {
+            document.getElementById('order_info').innerText = `Current Order: ${orderNumber} (Items: ${orderSize})`;
+        }
+        
+        function submitScan() {
+            let qr_code = document.getElementById('qr_input').value;
+            fetch('/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pk: qr_code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateOrderInfo(data.order_size, data.order_number);
+                    document.getElementById('qr_input').value = "";
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('qr_input').addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    submitScan();
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <h1>Inventory Overview</h1>
+    <p id="order_info">Current Order: {{ current_order_number }} (Items: {{ order_buffer|length }})</p>
     <table>
         <tr>
             <th>Type</th>
@@ -28,19 +61,6 @@
         {% endfor %}
     </table>
     <h2>Scan QR Code</h2>
-    <input type="text" id="qr_input" placeholder="Scan QR Code" />
-    <button onclick="submitScan()">Submit</button>
-    <script>
-        function submitScan() {
-            let qr_code = document.getElementById('qr_input').value;
-            fetch('/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pk: qr_code })
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message));
-        }
-    </script>
+    <input type="text" id="qr_input" placeholder="Scan QR Code" autofocus/>
 </body>
 </html>

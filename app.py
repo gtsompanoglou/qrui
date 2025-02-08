@@ -23,7 +23,7 @@ def get_inventory_view():
 def index():
     inventory_view = get_inventory_view()
     inventory_sizes = list(inventory_view.columns) if not inventory_view.empty else []
-    return render_template('index.html', inventory=inventory_view.to_dict(orient='index'), sizes=inventory_sizes)
+    return render_template('index.html', inventory=inventory_view.to_dict(orient='index'), sizes=inventory_sizes, order_buffer=order_buffer, current_order_number=current_order_number)
 
 @app.route('/scan', methods=['POST'])
 def scan():
@@ -37,16 +37,15 @@ def scan():
             save_inventory()
             order_buffer = []  # Clear buffer
             current_order_number += 1  # Increment order number
-            return jsonify({"success": True, "message": f"Order {current_order_number - 1} concluded."})
+            return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number - 1})
         else:
             return jsonify({"success": False, "message": "No items scanned for this order."}), 400
     
     if pk in df['pk'].values:
         order_buffer.append(pk)
-        return jsonify({"success": True, "message": "Item added to current order."})
+        return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number})
     else:
         return jsonify({"success": False, "message": "Item not found."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
-
