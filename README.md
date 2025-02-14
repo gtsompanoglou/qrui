@@ -38,3 +38,6 @@
 
 τώρα να ξέρεις ότι το απόθεμα τελικά είναι το 
 C:\Users\user\Desktop\qr printed backup\database\mcp\inventory pinakas
+
+τις τιμές τις βάζουμε από το assign_prices : 
+/c/Users/user/Desktop/flagexperts/infra/qr-related/assign_prices

@@ -9,7 +9,7 @@
     </style>
     <script>
         function playBeep() {
-            let beep = new Audio("error.wav");
+            let beep = new Audio('https://www.soundjay.com/button/beep-07.wav');
             beep.play();
         }
 
@@ -22,14 +22,15 @@
 
         setInterval(ensureFocus, 500); // Keep input focused every 0.5s
 
-        function updateOrderInfo(orderSize, orderNumber, orderItems) {
-            document.getElementById('order_info').innerText = `Current Order: ${orderNumber} (Items: ${orderSize})`;
+        function updateOrderInfo(orderSize, orderNumber, orderItems, orderTotalCost) {
+            document.getElementById('order_info').innerText = `Current Order: ${orderNumber} (Items: ${orderSize}) | Total Cost: $${orderTotalCost.toFixed(2)}`;
             let orderList = document.getElementById('order_list_body');
             orderItems.forEach(item => {
                 let row = document.createElement('tr');
-                row.innerHTML = `<td>${item[0]}</td><td>${item[1]}</td><td>${item[2]}</td>`;
+                row.innerHTML = `<td>${item[0]}</td><td>${item[1]}</td><td>${item[2]}</td><td>$${item[3].toFixed(2)}</td>`;
                 orderList.appendChild(row);
             });
+            document.getElementById('total_cost_display').innerText = `Total Cost: $${orderTotalCost.toFixed(2)}`;
         }
         
         function submitScan() {
@@ -47,7 +48,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    updateOrderInfo(data.order_size, data.order_number, data.order_items);
+                    updateOrderInfo(data.order_size, data.order_number, data.order_items, data.order_total_cost);
                     document.getElementById('qr_input').value = "";
                     playBeep(); // Play sound after successful scan
                 } else {
@@ -88,6 +89,7 @@
             </tr>
         {% endfor %}
     </table>
+    <p id="order_info">Current Order: {{ current_order_number }} (Items: {{ order_buffer|length }}) | Total Cost: ${{ order_total_cost }}</p>
     <h2>Scanned Items</h2>
     <table id="order_list">
         <thead>
@@ -95,13 +97,19 @@
                 <th>Type</th>
                 <th>Color</th>
                 <th>Size</th>
+                <th>Price</th>
             </tr>
         </thead>
         <tbody id="order_list_body">
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total Cost:</strong></td>
+                <td id="total_cost_display">$0.00</td>
+            </tr>
+        </tfoot>
     </table>
     <h2>Scan QR Code</h2>
     <input type="text" id="qr_input" placeholder="Scan QR Code" autofocus/>
 </body>
 </html>
-
