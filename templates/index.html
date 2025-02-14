@@ -8,6 +8,20 @@
         #order_list { margin-top: 20px; width: 100%; }
     </style>
     <script>
+        function playBeep() {
+            let beep = new Audio("error.wav");
+            beep.play();
+        }
+
+        function ensureFocus() {
+            let qrInput = document.getElementById('qr_input');
+            if (document.activeElement !== qrInput) {
+                qrInput.focus();
+            }
+        }
+
+        setInterval(ensureFocus, 500); // Keep input focused every 0.5s
+
         function updateOrderInfo(orderSize, orderNumber, orderItems) {
             document.getElementById('order_info').innerText = `Current Order: ${orderNumber} (Items: ${orderSize})`;
             let orderList = document.getElementById('order_list_body');
@@ -20,6 +34,11 @@
         
         function submitScan() {
             let qr_code = document.getElementById('qr_input').value;
+            if (!qr_code.trim()) {
+                alert("Scan failed! Please try again.");
+                return;
+            }
+
             fetch('/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -30,6 +49,7 @@
                 if (data.success) {
                     updateOrderInfo(data.order_size, data.order_number, data.order_items);
                     document.getElementById('qr_input').value = "";
+                    playBeep(); // Play sound after successful scan
                 } else {
                     alert(data.message);
                 }
@@ -37,7 +57,8 @@
         }
         
         document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById('qr_input').addEventListener("keypress", function(event) {
+            let qrInput = document.getElementById('qr_input');
+            qrInput.addEventListener("keypress", function(event) {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     submitScan();
@@ -83,3 +104,4 @@
     <input type="text" id="qr_input" placeholder="Scan QR Code" autofocus/>
 </body>
 </html>
+
