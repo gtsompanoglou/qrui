@@ -31,21 +31,23 @@ def scan():
     data = request.json
     pk = data.get('pk')
     
+    item_info = df.loc[df['pk'] == pk, ['type', 'color', 'size']].values.tolist()
     if pk == "endorder":
         if order_buffer:
             df.loc[df['pk'].isin(order_buffer), 'order'] = current_order_number
             save_inventory()
             order_buffer = []  # Clear buffer
             current_order_number += 1  # Increment order number
-            return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number - 1})
+            return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number - 1, "order_items": []})
         else:
             return jsonify({"success": False, "message": "No items scanned for this order."}), 400
     
     if pk in df['pk'].values:
         order_buffer.append(pk)
-        return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number})
+        return jsonify({"success": True, "order_size": len(order_buffer), "order_number": current_order_number, "order_items": item_info})
     else:
         return jsonify({"success": False, "message": "Item not found."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
+
